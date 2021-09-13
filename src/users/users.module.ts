@@ -5,9 +5,11 @@ import { UsersResolver } from "./users.resolver";
 import { User } from "./entities/user.entity";
 import { Podcast } from "../podcast/entities/podcast.entity";
 import { Episode } from "../podcast/entities/episode.entity";
+import { PodcastSubscription } from "src/podcast/entities/podcast-subscription.entity";
+import { PlayedEpisode } from "src/podcast/entities/played-episode.entity";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Podcast, Episode])],
+  imports: [TypeOrmModule.forFeature([User, Podcast, Episode, PodcastSubscription, PlayedEpisode])],
   providers: [UsersResolver, UsersService],
   exports: [UsersService]
 })

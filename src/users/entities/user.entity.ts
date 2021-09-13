@@ -2,7 +2,7 @@ import {
   ObjectType,
   Field,
   InputType,
-  registerEnumType
+  registerEnumType,
 } from "@nestjs/graphql";
 import { IsString, IsEmail } from "class-validator";
 import {
@@ -11,15 +11,15 @@ import {
   BeforeInsert,
   BeforeUpdate,
   OneToMany,
-  ManyToMany,
-  JoinTable
+  ManyToOne
 } from "typeorm";
 import { CoreEntity } from "./core.entity";
 import * as bcrypt from "bcrypt";
 import { InternalServerErrorException } from "@nestjs/common";
 import { Podcast } from "../../podcast/entities/podcast.entity";
-import { Episode } from "../../podcast/entities/episode.entity";
 import { Review } from "../../podcast/entities/review.entity";
+import { PodcastSubscription } from "src/podcast/entities/podcast-subscription.entity";
+import { PlayedEpisode } from "src/podcast/entities/played-episode.entity";
 
 export enum UserRole {
   Host = "Host",
@@ -54,15 +54,13 @@ export class User extends CoreEntity {
   @Field((type) => [Review])
   reviews: Review[];
 
-  @ManyToMany(() => Episode, { eager: true })
-  @Field((type) => [Episode])
-  @JoinTable()
-  playedEpisodes: Episode[];
+  @OneToMany(() => PodcastSubscription, PodcastSubscription => PodcastSubscription.user, { eager: true })
+  @Field(() => [PodcastSubscription])
+  podcastSubscriptions: PodcastSubscription[];
 
-  @ManyToMany(() => Podcast, { eager: true })
-  @Field(() => [Podcast])
-  @JoinTable()
-  subsriptions: Podcast[];
+  @OneToMany(() => PlayedEpisode, playedEpisode => playedEpisode.user, { eager: true })
+  @Field(() => [PlayedEpisode])
+  playedEpisodes: PlayedEpisode[];
 
   @BeforeInsert()
   @BeforeUpdate()

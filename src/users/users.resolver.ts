@@ -14,11 +14,11 @@ import {
   ToggleSubscribeOutput,
   ToggleSubscribeInput
 } from "./dtos/subscribe.dto";
-import { Podcast } from "src/podcast/entities/podcast.entity";
 import {
   MarkEpisodeAsPlayedOutput,
   MarkEpisodeAsPlayedInput
 } from "./dtos/mark-episode-played.dto";
+import { PodcastSubscription } from "src/podcast/entities/podcast-subscription.entity";
 
 @Resolver((of) => User)
 export class UsersResolver {
@@ -69,9 +69,9 @@ export class UsersResolver {
   }
 
   @Role(["Listener"])
-  @Query(() => [Podcast])
-  subscriptions(@AuthUser() user: User): Podcast[] {
-    return user.subsriptions;
+  @Query(() => [PodcastSubscription])
+  subscriptions(@AuthUser() user: User): PodcastSubscription[] {
+    return user.podcastSubscriptions;
   }
 
   @Role(["Listener"])

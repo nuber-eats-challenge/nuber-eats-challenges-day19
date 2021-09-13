@@ -20,6 +20,8 @@ import {
   MarkEpisodeAsPlayedOutput
 } from "./dtos/mark-episode-played.dto";
 import { Episode } from "src/podcast/entities/episode.entity";
+import { PodcastSubscription } from "src/podcast/entities/podcast-subscription.entity";
+import { PlayedEpisode } from "src/podcast/entities/played-episode.entity";
 
 @Injectable()
 export class UsersService {
@@ -30,8 +32,12 @@ export class UsersService {
     private readonly podcasts: Repository<Podcast>,
     @InjectRepository(Episode)
     private readonly episodes: Repository<Episode>,
-    private readonly jwtService: JwtService
-  ) {}
+    private readonly jwtService: JwtService,
+    @InjectRepository(PodcastSubscription)
+    private readonly podcastSubscriptions: Repository<PodcastSubscription>,
+    @InjectRepository(PlayedEpisode)
+    private readonly playedEpisodes: Repository<PlayedEpisode>,
+  ) { }
 
   private readonly InternalServerErrorOutput = {
     ok: false,
@@ -140,20 +146,27 @@ export class UsersService {
   ): Promise<ToggleSubscribeOutput> {
     try {
       const podcast = await this.podcasts.findOne({ id: podcastId });
+
       if (!podcast) {
         return { ok: false, error: "Podcast not found" };
       }
-      if (user.subsriptions.some((sub) => sub.id === podcast.id)) {
-        user.subsriptions = user.subsriptions.filter(
-          (sub) => sub.id !== podcast.id
+
+      if (user.podcastSubscriptions.some((sub) => sub.podcast === podcast.id)) {
+        user.podcastSubscriptions = user.podcastSubscriptions.filter(
+          (sub) => sub.podcast !== podcast.id
         );
       } else {
         console.log("foo");
-        user.subsriptions = [...user.subsriptions, podcast];
+        const podcastSubscription = this.podcastSubscriptions.create({ user: user.id, podcast: podcastId });
+        await this.podcastSubscriptions.save(podcastSubscription);
+        // user.podcastSubscriptions = [...user.podcastSubscriptions, podcastSubscription];
       }
+
       await this.users.save(user);
+
       return { ok: true };
-    } catch {
+    } catch (e) {
+      console.log(e);
       return this.InternalServerErrorOutput;
     }
   }
@@ -164,13 +177,19 @@ export class UsersService {
   ): Promise<MarkEpisodeAsPlayedOutput> {
     try {
       const episode = await this.episodes.findOne({ id: episodeId });
+
       if (!episode) {
         return { ok: false, error: "Episode not found" };
       }
-      user.playedEpisodes = [...user.playedEpisodes, episode];
-      await this.users.save(user);
+
+      const playedEpisode = this.playedEpisodes.create({ user: user.id, episode: episodeId })
+      await this.playedEpisodes.save(playedEpisode);
+
+      // await this.users.save(user);
+
       return { ok: true };
-    } catch {
+    } catch (e) {
+      console.log(e);
       return this.InternalServerErrorOutput;
     }
   }
