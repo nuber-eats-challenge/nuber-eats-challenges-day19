@@ -151,18 +151,16 @@ export class UsersService {
         return { ok: false, error: "Podcast not found" };
       }
 
-      if (user.podcastSubscriptions.some((sub) => sub.podcast === podcast.id)) {
-        user.podcastSubscriptions = user.podcastSubscriptions.filter(
-          (sub) => sub.podcast !== podcast.id
-        );
-      } else {
-        console.log("foo");
-        const podcastSubscription = this.podcastSubscriptions.create({ user: user.id, podcast: podcastId });
-        await this.podcastSubscriptions.save(podcastSubscription);
-        // user.podcastSubscriptions = [...user.podcastSubscriptions, podcastSubscription];
-      }
+      const ps = await this.podcastSubscriptions.findOne({user, podcast})
 
-      await this.users.save(user);
+      
+      if(ps){
+        const ps = await this.podcastSubscriptions.delete({user, podcast});
+        console.log(ps);
+      } else {
+        const podcastSubscription = this.podcastSubscriptions.create({ user, podcast });
+        await this.podcastSubscriptions.save(podcastSubscription);
+      }
 
       return { ok: true };
     } catch (e) {

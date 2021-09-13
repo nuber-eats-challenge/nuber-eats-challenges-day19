@@ -16,8 +16,14 @@ import { PlayedEpisode } from "./podcast/entities/played-episode.entity";
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: "sqlite",
-      database: "db.sqlite3",
+      // type: "sqlite",
+      // database: "db.sqlite3",
+      type: 'mysql',
+      database: 'nest-mysql',
+      username: 'root',
+      password: '111111',
+      port: 3306,
+      host: 'localhost',
       synchronize: true,
       logging: process.env.NODE_ENV !== "test",
       entities: [Podcast, Episode, User, Review, PodcastSubscription, PlayedEpisode]
